@@ -67,7 +67,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'auto_mutations.wsgi.application'
+WSGI_APPLICATION = 'django_auto_mutations.wsgi.application'
 
 
 # Database
