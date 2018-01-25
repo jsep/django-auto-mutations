@@ -1,2 +1,3 @@
 class AutoMutation:
-    pass
+    def test(self):
+        pass
