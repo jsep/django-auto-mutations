@@ -1,4 +1,11 @@
+from django.db import models
 from graphene_django.utils import get_model_fields
+
+M2M_MODEL_FIELDS = (models.ManyToManyField,
+                    models.ManyToManyRel,
+                    models.ManyToOneRel,)
+ONE2M_MODEL_FIELDS = (models.ForeignKey,)
+RELATED_MODEL_FIELDS = ONE2M_MODEL_FIELDS + M2M_MODEL_FIELDS
 
 
 class ModelFields:
@@ -23,6 +30,20 @@ class ModelFields:
 
     def all_names(self, **kwargs):
         return [key for key, value in self.all(**kwargs)]
+
+    def related(self):
+        return [
+            (name, field)
+            for name, field in self.all()
+            if isinstance(field, RELATED_MODEL_FIELDS)
+        ]
+
+    def m2m(self):
+        return [
+            (name, field)
+            for name, field in self.all()
+            if isinstance(field, M2M_MODEL_FIELDS)
+        ]
 
 
 class AutoMutation:

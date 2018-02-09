@@ -85,6 +85,27 @@ class TestModelFields(TestCase):
         all_fields = model_fields.all_names(only=only)
         self.assertOnlyFieldName(all_fields, only)
 
+    def test_get_all_include_related_fields(self):
+        model_fields = ModelFields(model=Category)
+        category_fields = model_fields.all_names()
+        expected_category_fields = [
+            'id', 'name', 'description', 'products', 'many'
+        ]
+        self.assertListEqual(category_fields, expected_category_fields)
+
+    def test_get_only_related_fields(self):
+        model_fields = ModelFields(model=Category)
+        category_fields = model_fields.related()
+        expected_category_fields = [('products', Category.products.rel),
+                                    ('many', Category.many.rel)]
+        self.assertEqual(category_fields, expected_category_fields)
+
+    def test_get_only_m2m_fields(self):
+        m2m_model_fields = ModelFields(model=ManyToManyModel)
+        m2m_fields = m2m_model_fields.m2m()
+        expected_m2m_fields = [('products', ManyToManyModel.products.field)]
+        self.assertListEqual(m2m_fields, expected_m2m_fields)
+
     def assertAllButField(self, fields, field_names):
         expected_field_names = [
             (key, field) for key, field in
@@ -127,5 +148,31 @@ SimpleModel = create_model(
     name='SimpleModel',
     app_label='model_fields',
     fields=simple_model_fields
+)
+Category = create_model(
+    name='Category',
+    app_label='model_fields',
+    fields={
+        'name': models.CharField(max_length=20),
+        'description': models.CharField(max_length=20)
+    }
+)
+Product = create_model(
+    name='Product',
+    app_label='model_fields',
+    fields={
+        'category': models.ForeignKey(Category, related_name='products',
+                                      on_delete=models.CASCADE)
+    }
+)
+ManyToManyModel = create_model(
+    name='ManyToManyModel',
+    app_label='model_fields',
+    fields={
+        'name': models.CharField(max_length=10),
+        'category': models.ForeignKey(Category, related_name='many',
+                                      on_delete=models.CASCADE),
+        'products': models.ManyToManyField(Product, related_name='many')
+    }
 )
 simple_model_fields['id'] = SimpleModel._meta.fields[0]  # id field
