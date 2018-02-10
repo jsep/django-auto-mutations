@@ -31,18 +31,25 @@ class ModelFields:
     def all_names(self, **kwargs):
         return [key for key, value in self.all(**kwargs)]
 
-    def related(self):
+    def related(self, **kwargs):
         return [
             (name, field)
-            for name, field in self.all()
+            for name, field in self.all(**kwargs)
             if isinstance(field, RELATED_MODEL_FIELDS)
         ]
 
-    def m2m(self):
+    def m2m(self, **kwargs):
         return [
             (name, field)
-            for name, field in self.all()
+            for name, field in self.all(**kwargs)
             if isinstance(field, M2M_MODEL_FIELDS)
+        ]
+
+    def one2m(self, **kwargs):
+        return [
+            (name, field)
+            for name, field in self.all(**kwargs)
+            if isinstance(field, ONE2M_MODEL_FIELDS)
         ]
 
 
