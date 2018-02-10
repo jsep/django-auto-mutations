@@ -29,7 +29,7 @@ class ModelFields:
         return all_fields
 
     def all_names(self, **kwargs):
-        return [key for key, value in self.all(**kwargs)]
+        return self._just_names(self.all(**kwargs))
 
     def related(self, **kwargs):
         return [
@@ -38,6 +38,9 @@ class ModelFields:
             if isinstance(field, RELATED_MODEL_FIELDS)
         ]
 
+    def related_names(self, **kwargs):
+        return self._just_names(self.related(**kwargs))
+
     def m2m(self, **kwargs):
         return [
             (name, field)
@@ -45,12 +48,21 @@ class ModelFields:
             if isinstance(field, M2M_MODEL_FIELDS)
         ]
 
+    def m2m_names(self, **kwargs):
+        return self._just_names(self.m2m(**kwargs))
+
     def one2m(self, **kwargs):
         return [
             (name, field)
             for name, field in self.all(**kwargs)
             if isinstance(field, ONE2M_MODEL_FIELDS)
         ]
+
+    def one2m_names(self, **kwargs):
+        return self._just_names(self.one2m(**kwargs))
+
+    def _just_names(self, fields):
+        return list(map(lambda f: f[0], fields))
 
 
 class AutoMutation:

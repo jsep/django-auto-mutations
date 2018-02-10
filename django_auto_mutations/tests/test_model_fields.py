@@ -49,41 +49,17 @@ class TestModelFields(TestCase):
         all_fields = model_fields.all(exclude=exclude)
         self.assertAllButField(all_fields, exclude)
 
-    def test_get_all_but_excluded_fields_names(self):
-        exclude = ['name']
-        model_fields = ModelFields(model=SimpleModel, exclude=exclude)
-        all_fields = model_fields.all_names()
-        self.assertAllButFieldName(all_fields, exclude)
-
-    def test_get_all_but_excluded_fields_names_from_argument(self):
-        exclude = ['name']
-        model_fields = ModelFields(model=SimpleModel)
-        all_fields = model_fields.all_names(exclude=exclude)
-        self.assertAllButFieldName(all_fields, exclude)
-
     def test_get_all_only_fields(self):
         only = ['name']
         model_fields = ModelFields(model=SimpleModel, only=only)
         all_fields = model_fields.all()
         self.assertOnlyField(all_fields, only)
 
-    def test_get_all_only_fields_names(self):
-        only = ['name']
-        model_fields = ModelFields(model=SimpleModel, only=only)
-        all_fields = model_fields.all_names()
-        self.assertOnlyFieldName(all_fields, only)
-
     def test_get_all_only_fields_from_argument(self):
         only = ['name']
         model_fields = ModelFields(model=SimpleModel, only=only)
         all_fields = model_fields.all()
         self.assertOnlyField(all_fields, only)
-
-    def test_get_all_only_fields_names_from_argument(self):
-        only = ['name']
-        model_fields = ModelFields(model=SimpleModel)
-        all_fields = model_fields.all_names(only=only)
-        self.assertOnlyFieldName(all_fields, only)
 
     def test_get_all_including_related_fields(self):
         model_fields = ModelFields(model=Category)
@@ -96,7 +72,7 @@ class TestModelFields(TestCase):
             sorted(expected_category_fields)
         )
 
-    def test_get_only_related_fields(self):
+    def test_get_just_related_fields(self):
         model_fields = ModelFields(model=Category)
         category_fields = model_fields.related()
         expected_category_fields = [
@@ -127,7 +103,16 @@ class TestModelFields(TestCase):
         expected_category_fields = [('products', Category.products.rel)]
         self.assertListEqual(category_fields, expected_category_fields)
 
-    def test_get_only_one2m_fields(self):
+    def test_get_related_field_names(self):
+        model_fields = ModelFields(model=Category)
+        expected_category_fields = ['products', 'many', 'one2many']
+        category_fields = model_fields.related_names()
+        self.assertListEqual(
+            sorted(category_fields),
+            sorted(expected_category_fields)
+        )
+
+    def test_get_just_one2m_fields(self):
         model_fields = ModelFields(model=Product)
         product_fields = model_fields.one2m()
         expected_product_fields = [('category', Product.category.field)]
@@ -136,7 +121,7 @@ class TestModelFields(TestCase):
             sorted(expected_product_fields)
         )
 
-    def test_get_only_one2m_fields_exclude_arg(self):
+    def test_get_just_one2m_fields_exclude_arg(self):
         model_fields = ModelFields(model=OneToMany, exclude=['category'])
         one2m_fields = model_fields.one2m()
         expected_one2m_fields = [('product', OneToMany.product.field)]
@@ -151,7 +136,7 @@ class TestModelFields(TestCase):
             sorted(expected_one2m_fields)
         )
 
-    def test_get_only_one2m_fields_only_arg(self):
+    def test_get_just_one2m_fields_only_arg(self):
         model_fields = ModelFields(model=OneToMany, only=['category'])
         one2m_fields = model_fields.one2m()
         expected_one2m_fields = [('category', OneToMany.category.field)]
@@ -166,7 +151,16 @@ class TestModelFields(TestCase):
             sorted(expected_one2m_fields)
         )
 
-    def test_get_only_m2m_fields(self):
+    def test_get_just_one2m_field_names(self):
+        model_fields = ModelFields(model=Product)
+        product_fields = model_fields.one2m_names()
+        expected_product_fields = ['category']
+        self.assertListEqual(
+            sorted(product_fields),
+            sorted(expected_product_fields)
+        )
+
+    def test_get_just_m2m_fields(self):
         m2m_model_fields = ModelFields(model=ManyToManyModel)
         m2m_fields = m2m_model_fields.m2m()
         expected_m2m_fields = [
@@ -175,7 +169,7 @@ class TestModelFields(TestCase):
         ]
         self.assertListEqual(m2m_fields, expected_m2m_fields)
 
-    def test_get_only_m2m_fields_exclude_arg(self):
+    def test_get_just_m2m_fields_exclude_arg(self):
         m2m_model_fields = ModelFields(model=ManyToManyModel, exclude=['one2m'])
         m2m_fields = m2m_model_fields.m2m()
         expected_m2m_fields = [('products', ManyToManyModel.products.field)]
@@ -184,7 +178,7 @@ class TestModelFields(TestCase):
         expected_m2m_fields = [('one2m', ManyToManyModel.one2m.field)]
         self.assertListEqual(m2m_fields, expected_m2m_fields)
 
-    def test_get_only_m2m_fields_only_arg(self):
+    def test_get_just_m2m_fields_only_arg(self):
         m2m_model_fields = ModelFields(model=ManyToManyModel, only=['products'])
         m2m_fields = m2m_model_fields.m2m()
         expected_m2m_fields = [('products', ManyToManyModel.products.field)]
@@ -193,6 +187,15 @@ class TestModelFields(TestCase):
         m2m_fields = m2m_model_fields.m2m(only=['one2m'])
         expected_m2m_fields = [('one2m', ManyToManyModel.one2m.field)]
         self.assertListEqual(m2m_fields, expected_m2m_fields)
+
+    def test_get_just_m2m_field_names(self):
+        m2m_model_fields = ModelFields(model=ManyToManyModel)
+        m2m_fields = m2m_model_fields.m2m_names()
+        expected_m2m_fields = ['products', 'one2m']
+        self.assertListEqual(
+            sorted(m2m_fields),
+            sorted(expected_m2m_fields)
+        )
 
     def assertAllButField(self, fields, field_names):
         expected_field_names = [
