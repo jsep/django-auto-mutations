@@ -20,11 +20,19 @@ class ModelFields:
         self.exclude = kwargs.get('exclude', [])
         self.only = kwargs.get('only', [])
         assert self.model is not None, "model not defined"
+        if self.exclude is None:
+            self.exclude = []
+        if self.only is None:
+            self.only = []
 
     def all(self, **kwargs):
         model_fields = get_model_fields(self.model)
         exclude = kwargs.get('exclude', self.exclude)
         only = kwargs.get('only', self.only)
+        if exclude is None:
+            exclude = self.exclude
+        if only is None:
+            only = self.only
         all_fields = []
         for key, field in model_fields:
             is_excluded = key in exclude

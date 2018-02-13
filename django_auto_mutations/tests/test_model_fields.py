@@ -25,6 +25,13 @@ class TestModelFields(TestCase):
         self.assertEqual(model_fields.model, SimpleModel)
         self.assertEqual(model_fields.exclude, exclude)
         self.assertEqual(model_fields.only, only)
+        model_fields = ModelFields(
+            model=SimpleModel,
+            only=None,
+            exclude=None
+        )
+        self.assertEqual(model_fields.exclude, [])
+        self.assertEqual(model_fields.only, [])
 
     def test_get_all_fields(self):
         model_fields = ModelFields(model=SimpleModel)
@@ -46,9 +53,11 @@ class TestModelFields(TestCase):
 
     def test_get_all_but_excluded_fields_from_argument(self):
         exclude = ['name']
-        model_fields = ModelFields(model=SimpleModel)
+        model_fields = ModelFields(model=SimpleModel, exclude=['description'])
         all_fields = model_fields.all(exclude=exclude)
         self.assertAllButField(all_fields, exclude)
+        all_fields = model_fields.all(exclude=None)
+        self.assertAllButField(all_fields, ['description'])
 
     def test_get_all_only_fields(self):
         only = ['name']
@@ -58,9 +67,11 @@ class TestModelFields(TestCase):
 
     def test_get_all_only_fields_from_argument(self):
         only = ['name']
-        model_fields = ModelFields(model=SimpleModel, only=only)
-        all_fields = model_fields.all()
+        model_fields = ModelFields(model=SimpleModel, only=['description'])
+        all_fields = model_fields.all(only=only)
         self.assertOnlyField(all_fields, only)
+        all_fields = model_fields.all(only=None)
+        self.assertOnlyField(all_fields, ['description'])
 
     def test_get_all_including_related_fields(self):
         model_fields = ModelFields(model=Category)
