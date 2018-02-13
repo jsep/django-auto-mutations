@@ -1,6 +1,7 @@
 import re
 from abc import ABCMeta, abstractmethod
 
+import graphene
 from django.db import models
 from django.db.models.base import ModelBase
 from graphene_django.registry import get_global_registry
@@ -109,12 +110,34 @@ class BaseMutation:
     def construct_fields(cls, model, **kwargs):
         exclude_fields = kwargs.get('exclude_fields', [])
         only_fields = kwargs.get('only_fields', [])
-        return construct_fields(**{
-            "model": model,
-            "only_fields": only_fields,
-            "exclude_fields": exclude_fields,
-            "registry": get_global_registry()
-        })
+        model_fields = ModelFields(
+            model=model,
+            exclude=exclude_fields,
+            only=only_fields
+        )
+        exclude_fields = exclude_fields + model_fields.related_names()
+        fields = construct_fields(**{"model": model, "only_fields": only_fields,
+                                     "exclude_fields": exclude_fields,
+                                     "registry": get_global_registry()})
+        related_fields = cls.related_fields(model=model, **kwargs)
+        fields = {**fields, **related_fields}
+
+        return fields
+
+    @classmethod
+    def related_fields(cls, model, **kwargs):
+        model_fields = ModelFields(
+            model=model,
+            exclude=kwargs.get('exclude_fields'),
+            only=kwargs.get('only_fields')
+        )
+        fields = {}
+        for key, value in model_fields.one2m():
+            fields[key + '_id'] = graphene.ID(required=not value.blank)
+        for key, value in model_fields.m2m():
+            fields[key] = graphene.List(graphene.ID, required=False)
+
+        return fields
 
 
 class AutoMutation:

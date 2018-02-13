@@ -4,7 +4,8 @@ from unittest.mock import patch
 import graphene
 
 from django_auto_mutations.auto_mutation import BaseMutation
-from django_auto_mutations.tests.test_model_fields import SimpleModel
+from django_auto_mutations.tests.test_model_fields import SimpleModel, Category, \
+    Product
 from django_auto_mutations.tests.utils import simple_model_fields_name, \
     dict_keys
 
@@ -37,7 +38,8 @@ class BaseMutationTest(TestCase):
 
     def test_construct_fields(self):
         fields = BaseMutation.construct_fields(model=SimpleModel)
-        self.assertListEqual(dict_keys(fields), sorted(simple_model_fields_name))
+        self.assertListEqual(dict_keys(fields),
+                             sorted(simple_model_fields_name))
         self.assertIsInstance(fields['id'], graphene.types.scalars.ID)
         self.assertIsInstance(fields['name'], graphene.types.scalars.String)
         self.assertIsInstance(fields['description'],
@@ -56,3 +58,22 @@ class BaseMutationTest(TestCase):
             only_fields=['description']
         )
         self.assertListEqual(dict_keys(fields), ['description'])
+
+    def test_construct_fields_related_fields(self):
+        fields = BaseMutation.construct_fields(model=Product)
+        self.assertListEqual(
+            dict_keys(fields),
+            sorted(['category_id', 'id', 'many', 'one2many'])
+        )
+
+    def test_related_fields(self):
+        fields = BaseMutation.related_fields(model=Product)
+        self.assertListEqual(
+            dict_keys(fields),
+            sorted(['category_id', 'many', 'one2many'])
+        )
+
+        self.assertIsInstance(fields['category_id'], graphene.types.scalars.ID)
+        self.assertIsInstance(fields['many'], graphene.types.List)
+        self.assertIsInstance(fields['one2many'], graphene.types.List)
+
