@@ -2,7 +2,8 @@ from django.db import models
 from django.test import TestCase
 
 from django_auto_mutations.auto_mutation import ModelFields
-from django_auto_mutations.tests.utils import create_model
+from django_auto_mutations.tests.utils import create_model, simple_model_fields, \
+    simple_model_fields_name
 
 
 class TestModelFields(TestCase):
@@ -226,13 +227,6 @@ class TestModelFields(TestCase):
         self.assertEqual(sorted(fields), sorted(expected_fields))
 
 
-simple_model_fields = {
-    'name': models.CharField(max_length=20),
-    'description': models.CharField(max_length=20)
-}
-simple_model_fields_name = [
-    k for k, v in simple_model_fields.items()
-]
 simple_model_fields_name.append('id')
 simple_model_fields_name = sorted(simple_model_fields_name)
 SimpleModel = create_model(

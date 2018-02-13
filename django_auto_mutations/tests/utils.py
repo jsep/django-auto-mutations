@@ -1,3 +1,4 @@
+from django.contrib import admin
 from django.db import models
 
 
@@ -58,3 +59,28 @@ def create_model(name, fields=None, app_label='',
         admin.site.register(model, Admin)
 
     return model
+
+
+simple_model_fields = {
+    'name': models.CharField(max_length=20),
+    'description': models.CharField(max_length=20)
+}
+simple_model_fields_name = [
+    k for k, v in simple_model_fields.items()
+]
+
+
+def dict_keys(obj: dict):
+    return sorted([k for k, v in obj.items()])
+
+
+def class_attr_name(klass):
+    return [a[0] for a in class_attr(klass)]
+
+
+def class_attr(klass):
+    def is_special_attr(a):
+        return a[0].startswith("__") or a[0].endswith("__")
+
+    return [att for att in filter(lambda a: not (is_special_attr(a)),
+                                  klass.__dict__.items())]
